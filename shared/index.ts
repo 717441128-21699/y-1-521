@@ -99,6 +99,11 @@ export interface PackagePlan {
   casePhotos: string[];
   highlights: string[];
   availableSlots: number;
+  recommendReasons?: string[];
+  serveCities?: string[];
+  minGuests?: number;
+  maxGuests?: number;
+  peakSeasonBonus?: number;
 }
 
 export interface LockResult {
@@ -107,6 +112,9 @@ export interface LockResult {
   expiresAt: string;
   items: { type: VendorServiceType; name: string; locked: boolean }[];
   totalDeposit: number;
+  isExpired?: boolean;
+  planId?: string;
+  planName?: string;
 }
 
 export type ProjectStatus = 'pending' | 'active' | 'completed' | 'cancelled';

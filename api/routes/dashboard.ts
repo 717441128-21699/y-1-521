@@ -12,7 +12,12 @@ const extractRole = (req: Request): { role: UserRole; userId: string } => {
 
 router.get('/overview', (req: Request, res: Response) => {
   const { role, userId } = extractRole(req);
-  const data = DataStore.dashboard.getOverview(role, userId);
+  const { dateRange } = req.query;
+  let parsedDateRange = undefined;
+  if (dateRange && typeof dateRange === 'string') {
+    try { parsedDateRange = JSON.parse(decodeURIComponent(dateRange)); } catch (e) {}
+  }
+  const data = DataStore.dashboard.getOverview(role, userId, parsedDateRange);
   return res.json({ success: true, data });
 });
 

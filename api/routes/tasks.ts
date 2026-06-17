@@ -10,8 +10,14 @@ const extractUser = (req: Request): { vendorId: string; userId: string } => {
 
 router.get('/', (req: Request, res: Response) => {
   const { vendorId } = extractUser(req);
+  DataStore.tasks.checkAutoReassign();
   const data = DataStore.tasks.getByVendor(vendorId);
   return res.json({ success: true, data });
+});
+
+router.post('/check-auto-reassign', (_req: Request, res: Response) => {
+  const data = DataStore.tasks.checkAutoReassign();
+  return res.json({ success: true, data, count: data.length });
 });
 
 router.post('/:id/accept', (req: Request, res: Response) => {

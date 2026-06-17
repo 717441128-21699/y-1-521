@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
   Filter, Sparkles, MapPin, Users, Calendar, DollarSign, Palette,
-  Lock, Clock, Check, ChevronRight, Star, Heart, Zap, Award, Shield
+  Lock, Clock, Check, ChevronRight, Star, Heart, Zap, Award, Shield, AlertTriangle
 } from 'lucide-react';
 import { apiFetch } from '../store/auth';
 import type { PackagePlan, ConsultationForm, LockResult } from '@shared/index';
@@ -45,7 +45,15 @@ export default function ConsultationPage() {
 
   useEffect(() => {
     if (!lockResult) return;
+    const checkStatus = async () => {
+      const status = await apiFetch<LockResult | null>(`/api/consultation/lock-status?lockId=${lockResult.lockId}`);
+      if (!status) {
+        setLockResult(null);
+        setCountdown('已过期');
+      }
+    };
     const t = setInterval(() => {
+      checkStatus();
       const remain = new Date(lockResult.expiresAt).getTime() - Date.now();
       if (remain <= 0) { setCountdown('已过期'); clearInterval(t); return; }
       const h = Math.floor(remain / 3600000);
@@ -231,6 +239,21 @@ export default function ConsultationPage() {
                       ))}
                     </ul>
 
+                    {pkg.recommendReasons && pkg.recommendReasons.length > 0 && (
+                      <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-3 border border-amber-100">
+                        <div className="text-xs font-semibold text-amber-700 mb-1.5 flex items-center gap-1">
+                          <Sparkles className="w-3.5 h-3.5" /> 推荐理由
+                        </div>
+                        <ul className="space-y-1">
+                          {pkg.recommendReasons.slice(0, 4).map((r, idx) => (
+                            <li key={idx} className="text-[11px] text-amber-800 flex items-start gap-1.5">
+                              <span className="text-amber-500 mt-0.5">•</span> {r}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
                     <div className="flex items-end justify-between pt-2 border-t border-blush-100">
                       <div>
                         <div className="text-xs text-warm-400 line-through tabular-nums">{formatPrice(pkg.originalPrice)}</div>
@@ -248,14 +271,28 @@ export default function ConsultationPage() {
         </div>
       )}
 
-      {step === 2 && lockResult && (
+      {step === 2 && (
         <div className="max-w-2xl mx-auto">
-          <div className="card p-8 text-center animate-fade-up">
-            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-emerald-50 flex items-center justify-center">
-              <Lock className="w-10 h-10 text-emerald-500" />
+          {!lockResult && countdown === '已过期' ? (
+            <div className="card p-8 text-center animate-fade-up">
+              <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-wine-50 flex items-center justify-center">
+                <AlertTriangle className="w-10 h-10 text-wine-500" />
+              </div>
+              <h2 className="font-serif text-2xl font-bold text-warm-800 mb-2">锁定已过期</h2>
+              <p className="text-warm-500 mb-6">您的锁定已超过24小时有效期，所选资源已自动释放，请重新选择方案</p>
+              <div className="flex justify-center gap-3">
+                <button onClick={() => setStep(1)} className="btn-primary">返回方案列表</button>
+                <button onClick={() => { setStep(0); }} className="btn-secondary">重新咨询</button>
+              </div>
             </div>
-            <h2 className="font-serif text-2xl font-bold text-warm-800 mb-2">档期已成功锁定！</h2>
-            <p className="text-warm-500 mb-6">所选资源已为您保留，请在倒计时结束前完成预付款支付</p>
+          ) : lockResult && (
+            <div className="card p-8 text-center animate-fade-up">
+              <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-emerald-50 flex items-center justify-center">
+                <Lock className="w-10 h-10 text-emerald-500" />
+              </div>
+              <h2 className="font-serif text-2xl font-bold text-warm-800 mb-2">档期已成功锁定！</h2>
+              <p className="text-warm-500 mb-2">{lockResult.planName || '婚礼方案'}</p>
+              <p className="text-warm-500 mb-6">所选资源已为您保留，请在倒计时结束前完成预付款支付</p>
 
             <div className="bg-gradient-to-r from-wine-50 to-brand-50 rounded-2xl p-5 mb-6">
               <div className="flex items-center justify-center gap-3 mb-2">
@@ -302,6 +339,7 @@ export default function ConsultationPage() {
               <button onClick={() => { setLockResult(null); setStep(0); }} className="btn-secondary !py-2 text-sm">重新咨询</button>
             </div>
           </div>
+          )}
         </div>
       )}
     </div>

@@ -14,21 +14,58 @@ import { RevenuePieChart, RevenueBarChart } from '../components/charts/RevenueCh
 import DashboardToolbar from '../components/dashboard/DashboardToolbar';
 import { useAuth } from '../store/auth';
 
+function getDateRange(preset: string): { start: string; end: string; preset: string } {
+  const now = new Date();
+  const end = new Date(now);
+  let start = new Date(now);
+  switch (preset) {
+    case 'this_month':
+      start = new Date(now.getFullYear(), now.getMonth(), 1);
+      break;
+    case 'last_month':
+      start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      end.setDate(0);
+      break;
+    case 'last_7_days':
+      start.setDate(start.getDate() - 7);
+      break;
+    case 'this_quarter':
+      start = new Date(now.getFullYear(), Math.floor(now.getMonth() / 3) * 3, 1);
+      break;
+    case 'this_year':
+      start = new Date(now.getFullYear(), 0, 1);
+      break;
+    default:
+      start.setDate(start.getDate() - 30);
+  }
+  return {
+    start: start.toISOString().slice(0, 10),
+    end: end.toISOString().slice(0, 10),
+    preset,
+  };
+}
+
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardOverview | null>(null);
-  const [dateRange, setDateRange] = useState('this_month');
+  const [datePreset, setDatePreset] = useState('this_month');
   const [packageType, setPackageType] = useState<PackageType | 'all'>('all');
   const [lastUpdate, setLastUpdate] = useState(new Date());
   const { user } = useAuth();
 
-  const loadData = async () => {
-    const d = await apiFetch<DashboardOverview>('/api/dashboard/overview');
+  const loadData = async (preset?: string) => {
+    const range = getDateRange(preset || datePreset);
+    const d = await apiFetch<DashboardOverview>(
+      `/api/dashboard/overview?dateRange=${encodeURIComponent(JSON.stringify(range))}`
+    );
     setData(d);
     setLastUpdate(new Date());
   };
 
   const refresh = async () => {
-    const d = await apiFetch<DashboardOverview>('/api/dashboard/realtime');
+    const range = getDateRange(datePreset);
+    const d = await apiFetch<DashboardOverview>(
+      `/api/dashboard/realtime?dateRange=${encodeURIComponent(JSON.stringify(range))}`
+    );
     setData(d);
     setLastUpdate(new Date());
   };
@@ -48,9 +85,12 @@ export default function DashboardPage() {
 
   useEffect(() => {
     loadData();
+  }, [datePreset]);
+
+  useEffect(() => {
     const timer = setInterval(refresh, 5000);
     return () => clearInterval(timer);
-  }, []);
+  }, [datePreset]);
 
   if (!data) {
     return (
@@ -92,7 +132,7 @@ export default function DashboardPage() {
       </div>
 
       <DashboardToolbar
-        dateRange={dateRange} setDateRange={setDateRange}
+        dateRange={datePreset} setDateRange={setDatePreset}
         packageType={packageType} setPackageType={setPackageType}
         refresh={refresh} exportReport={exportReport}
       />

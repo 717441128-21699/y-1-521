@@ -133,6 +133,10 @@ export const MOCK_PACKAGES: PackagePlan[] = [
     casePhotos: [IMAGE_URLS[0], IMAGE_URLS[1], IMAGE_URLS[6], IMAGE_URLS[7]],
     highlights: ['赠送婚礼策划总监一对一服务', '赠送新娘婚前SPA一次', '赠送父母礼服各一套', '赠送婚车头车装饰'],
     availableSlots: 3,
+    serveCities: ['上海', '北京', '杭州', '苏州'],
+    minGuests: 60,
+    maxGuests: 120,
+    peakSeasonBonus: 5,
   },
   {
     planId: 'pkg-002',
@@ -152,6 +156,10 @@ export const MOCK_PACKAGES: PackagePlan[] = [
     casePhotos: [IMAGE_URLS[2], IMAGE_URLS[3], IMAGE_URLS[4], IMAGE_URLS[5]],
     highlights: ['赠送婚礼执行督导一名', '赠送新娘手捧花一束', '赠送婚礼电子请柬制作'],
     availableSlots: 5,
+    serveCities: ['上海', '杭州', '南京', '苏州', '宁波'],
+    minGuests: 40,
+    maxGuests: 80,
+    peakSeasonBonus: 3,
   },
   {
     planId: 'pkg-003',
@@ -170,6 +178,10 @@ export const MOCK_PACKAGES: PackagePlan[] = [
     casePhotos: [IMAGE_URLS[4], IMAGE_URLS[5], IMAGE_URLS[6]],
     highlights: ['赠送基础策划方案', '赠送签到台布置', '赠送交杯酒及蛋糕仪式道具'],
     availableSlots: 8,
+    serveCities: ['上海', '杭州', '苏州', '无锡', '常州'],
+    minGuests: 20,
+    maxGuests: 50,
+    peakSeasonBonus: 0,
   },
   {
     planId: 'pkg-004',
@@ -189,6 +201,10 @@ export const MOCK_PACKAGES: PackagePlan[] = [
     casePhotos: [IMAGE_URLS[6], IMAGE_URLS[7], IMAGE_URLS[0], IMAGE_URLS[1], IMAGE_URLS[2]],
     highlights: ['赠送婚前派对策划执行', '赠送明星级婚纱礼服三件套', '赠送蜜月旅行基金20000元', '赠送婚礼微电影拍摄', '赠送父母海外旅游套餐'],
     availableSlots: 1,
+    serveCities: ['上海', '北京', '深圳', '广州'],
+    minGuests: 80,
+    maxGuests: 200,
+    peakSeasonBonus: 8,
   },
 ];
 

@@ -27,15 +27,21 @@ export default function FinancePage() {
       ]);
       setRecords(r);
       setWarnings(w);
-      setSelectedId(r[0]?.id || null);
+      if (!selectedId) setSelectedId(r[0]?.id || null);
       setLoading(false);
     };
     load();
+    const timer = setInterval(load, 15000);
+    return () => clearInterval(timer);
   }, []);
 
   const handleRemind = async (projectId: string) => {
     await apiFetch('/api/finance/remind', { method: 'POST', body: JSON.stringify({ projectId }) });
-    const w = await apiFetch<FinanceWarning[]>('/api/finance/warnings');
+    const [r, w] = await Promise.all([
+      apiFetch<FinanceRecord[]>('/api/finance/projects'),
+      apiFetch<FinanceWarning[]>('/api/finance/warnings'),
+    ]);
+    setRecords(r);
     setWarnings(w);
   };
 

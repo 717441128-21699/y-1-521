@@ -50,7 +50,31 @@ export default function VendorDashboardPage() {
     const timer = setInterval(() => {
       setAcceptCountdown(prev => {
         const next = { ...prev };
-        Object.keys(next).forEach(k => { if (next[k] > 0) next[k] = Math.max(0, next[k] - 1); });
+        const justExpired: string[] = [];
+        Object.keys(next).forEach(k => {
+          if (next[k] > 0) {
+            next[k] = Math.max(0, next[k] - 1);
+            if (next[k] === 0) justExpired.push(k);
+          }
+        });
+        if (justExpired.length > 0) {
+          justExpired.forEach(async (taskId) => {
+            try {
+              await apiFetch(`/api/tasks/${taskId}/reassign`, { method: 'POST' });
+              const data = await apiFetch<Task[]>('/api/tasks');
+              setTasks(data);
+              const cd: Record<string, number> = {};
+              data.forEach(t => {
+                if (t.status === 'assigned' || t.status === 'reassigned') {
+                  cd[t.id] = 7200;
+                }
+              });
+              setAcceptCountdown(cd);
+            } catch (e) {
+              console.error('Auto reassign failed:', e);
+            }
+          });
+        }
         return next;
       });
     }, 1000);
