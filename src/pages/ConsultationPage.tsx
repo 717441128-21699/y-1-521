@@ -32,6 +32,36 @@ export default function ConsultationPage() {
   const [loading, setLoading] = useState(false);
   const [lockResult, setLockResult] = useState<LockResult | null>(null);
   const [countdown, setCountdown] = useState('');
+  const [loadingLockStatus, setLoadingLockStatus] = useState(false);
+
+  useEffect(() => {
+    const restoreLock = async () => {
+      try {
+        const saved = localStorage.getItem('wedding_lock_result');
+        if (saved) {
+          const parsed = JSON.parse(saved) as LockResult;
+          setLoadingLockStatus(true);
+          try {
+            const status = await apiFetch<LockResult | null>(`/api/consultation/lock-status/${parsed.lockId}`);
+            if (status && !status.isExpired) {
+              setLockResult(status);
+              setStep(2);
+            } else if (status?.isExpired) {
+              setLockResult({ ...parsed, isExpired: true });
+              setCountdown('已过期');
+              setStep(2);
+            } else {
+              localStorage.removeItem('wedding_lock_result');
+            }
+          } catch {
+            localStorage.removeItem('wedding_lock_result');
+          }
+          setLoadingLockStatus(false);
+        }
+      } catch {}
+    };
+    restoreLock();
+  }, []);
 
   useEffect(() => {
     const load = async () => {
@@ -46,12 +76,12 @@ export default function ConsultationPage() {
   useEffect(() => {
     if (!lockResult) return;
     const checkStatus = async () => {
-      const status = await apiFetch<LockResult | null>(`/api/consultation/lock-status?lockId=${lockResult.lockId}`);
+      const status = await apiFetch<LockResult | null>(`/api/consultation/lock-status/${lockResult.lockId}`);
       if (status && status.isExpired) {
         setLockResult({ ...lockResult, isExpired: true });
         setCountdown('已过期');
       } else if (!status) {
-        setLockResult(null);
+        clearLockResult();
         setCountdown('已过期');
       }
     };
@@ -86,7 +116,13 @@ export default function ConsultationPage() {
       method: 'POST', body: JSON.stringify({ planId }),
     });
     setLockResult(data);
+    try { localStorage.setItem('wedding_lock_result', JSON.stringify(data)); } catch {}
     setStep(2);
+  };
+
+  const clearLockResult = () => {
+    setLockResult(null);
+    try { localStorage.removeItem('wedding_lock_result'); } catch {}
   };
 
   return (
@@ -285,7 +321,7 @@ export default function ConsultationPage() {
               <p className="text-warm-500 mb-6">您的锁定已超过24小时有效期，所选资源已自动释放，请重新选择方案</p>
               <div className="flex justify-center gap-3">
                 <button onClick={() => setStep(1)} className="btn-primary">返回方案列表</button>
-                <button onClick={() => { setLockResult(null); setStep(0); }} className="btn-secondary">重新咨询</button>
+                <button onClick={() => { clearLockResult(); setStep(0); }} className="btn-secondary">重新咨询</button>
               </div>
             </div>
           ) : lockResult && !lockResult.isExpired && (

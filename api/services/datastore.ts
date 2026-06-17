@@ -93,7 +93,7 @@ export const DataStore = {
       }
       return result;
     },
-    getRealtime: (): DashboardOverview => {
+    getRealtime: (dateRange?: { start: string; end: string; preset: string }): DashboardOverview => {
       dashboard.kpis.activeProjects += Math.random() > 0.7 ? 1 : 0;
       dashboard.kpis.monthlyRevenue += Math.floor(Math.random() * 1000);
       dashboard.projectProgress.forEach(p => {
@@ -102,7 +102,20 @@ export const DataStore = {
       dashboard.vendorRanking.forEach(v => {
         v.completionRate = Math.min(100, v.completionRate + (Math.random() - 0.3) * 0.5);
       });
-      return JSON.parse(JSON.stringify(dashboard));
+      const result = JSON.parse(JSON.stringify(dashboard)) as DashboardOverview;
+      if (dateRange) {
+        const days = Math.max(1, (new Date(dateRange.end).getTime() - new Date(dateRange.start).getTime()) / 86400000);
+        const multiplier = days / 30;
+        result.kpis.activeProjects = Math.max(1, Math.round(result.kpis.activeProjects * multiplier * (0.9 + Math.random() * 0.2)));
+        result.kpis.monthlyRevenue = Math.round(result.kpis.monthlyRevenue * multiplier * (0.9 + Math.random() * 0.2));
+        result.kpis.totalVendors = Math.max(1, Math.round(result.kpis.totalVendors * multiplier * (0.9 + Math.random() * 0.2)));
+        result.kpis.avgSatisfaction = Math.max(3, Math.min(5, result.kpis.avgSatisfaction * (0.95 + Math.random() * 0.1)));
+        result.projectProgress = result.projectProgress.map(p => ({ ...p, progress: Math.min(100, Math.max(0, Math.round(p.progress * (0.85 + Math.random() * 0.3)))) }));
+        result.revenueBreakdown.monthly = result.revenueBreakdown.monthly.map(p => ({ ...p, revenue: Math.round(p.revenue * multiplier * (0.85 + Math.random() * 0.3)), cost: Math.round(p.cost * multiplier * (0.85 + Math.random() * 0.3)) }));
+        result.revenueBreakdown.categories = result.revenueBreakdown.categories.map(p => ({ ...p, value: Math.round(p.value * multiplier * (0.85 + Math.random() * 0.3)) }));
+        result.satisfactionTrend = result.satisfactionTrend.map(p => ({ ...p, score: Math.max(3, Math.min(5, p.score * (0.9 + Math.random() * 0.2))), projectCount: Math.max(1, Math.round(p.projectCount * multiplier * (0.85 + Math.random() * 0.3))) }));
+      }
+      return result;
     },
   },
 

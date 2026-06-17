@@ -21,8 +21,13 @@ router.get('/overview', (req: Request, res: Response) => {
   return res.json({ success: true, data });
 });
 
-router.get('/realtime', (_req: Request, res: Response) => {
-  const data = DataStore.dashboard.getRealtime();
+router.get('/realtime', (req: Request, res: Response) => {
+  const { dateRange } = req.query;
+  let parsedDateRange = undefined;
+  if (dateRange && typeof dateRange === 'string') {
+    try { parsedDateRange = JSON.parse(decodeURIComponent(dateRange)); } catch (e) {}
+  }
+  const data = DataStore.dashboard.getRealtime(parsedDateRange);
   return res.json({ success: true, data });
 });
 

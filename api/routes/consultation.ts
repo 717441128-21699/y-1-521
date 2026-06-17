@@ -29,7 +29,6 @@ router.post('/lock', (req: Request, res: Response) => {
 router.get('/lock-status/:lockId', (req: Request, res: Response) => {
   const { lockId } = req.params;
   const result = DataStore.consultation.getLockStatus(lockId);
-  if (!result) return res.status(404).json({ success: false, error: '锁定记录不存在' });
   return res.json({ success: true, data: result });
 });
 
