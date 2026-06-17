@@ -249,8 +249,7 @@ export const DataStore = {
       const expires = new Date(lock.expiresAt);
       if (now > expires) {
         lock.isExpired = true;
-        locks.delete(lockId);
-        return null;
+        return { ...lock, isExpired: true };
       }
       return { ...lock, isExpired: false };
     },
@@ -337,12 +336,20 @@ export const DataStore = {
       return null;
     },
     reassign: (taskId: string): Task | null => {
+      const now = new Date();
       for (const p of projects) {
         const t = p.tasks.find(x => x.id === taskId);
         if (t) {
-          t.status = 'reassigned';
-          t.reassignedCount++;
-          return t;
+          const otherVendors = users.filter(u => u.role === 'vendor' && u.vendorType === t.type && u.id !== t.assignedVendorId);
+          if (otherVendors.length > 0) {
+            const newVendor = otherVendors[Math.floor(Math.random() * otherVendors.length)];
+            t.assignedVendorId = newVendor.id;
+            t.assignedVendorName = newVendor.name;
+            t.status = 'reassigned';
+            t.reassignedCount++;
+            t.deadline = new Date(now.getTime() + recommendRules.acceptTimeoutHours * 3600000).toISOString();
+            return { ...t, coupleName: p.coupleName, weddingDate: p.weddingDate };
+          }
         }
       }
       return null;

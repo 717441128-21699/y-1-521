@@ -47,7 +47,10 @@ export default function ConsultationPage() {
     if (!lockResult) return;
     const checkStatus = async () => {
       const status = await apiFetch<LockResult | null>(`/api/consultation/lock-status?lockId=${lockResult.lockId}`);
-      if (!status) {
+      if (status && status.isExpired) {
+        setLockResult({ ...lockResult, isExpired: true });
+        setCountdown('已过期');
+      } else if (!status) {
         setLockResult(null);
         setCountdown('已过期');
       }
@@ -273,7 +276,7 @@ export default function ConsultationPage() {
 
       {step === 2 && (
         <div className="max-w-2xl mx-auto">
-          {!lockResult && countdown === '已过期' ? (
+          {(!lockResult || lockResult?.isExpired) && countdown === '已过期' ? (
             <div className="card p-8 text-center animate-fade-up">
               <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-wine-50 flex items-center justify-center">
                 <AlertTriangle className="w-10 h-10 text-wine-500" />
@@ -282,10 +285,10 @@ export default function ConsultationPage() {
               <p className="text-warm-500 mb-6">您的锁定已超过24小时有效期，所选资源已自动释放，请重新选择方案</p>
               <div className="flex justify-center gap-3">
                 <button onClick={() => setStep(1)} className="btn-primary">返回方案列表</button>
-                <button onClick={() => { setStep(0); }} className="btn-secondary">重新咨询</button>
+                <button onClick={() => { setLockResult(null); setStep(0); }} className="btn-secondary">重新咨询</button>
               </div>
             </div>
-          ) : lockResult && (
+          ) : lockResult && !lockResult.isExpired && (
             <div className="card p-8 text-center animate-fade-up">
               <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-emerald-50 flex items-center justify-center">
                 <Lock className="w-10 h-10 text-emerald-500" />

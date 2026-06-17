@@ -38,7 +38,10 @@ export default function VendorDashboardPage() {
       const cd: Record<string, number> = {};
       data.forEach(t => {
         if (t.status === 'assigned' || t.status === 'reassigned') {
-          cd[t.id] = 7200 - Math.floor(Math.random() * 3600);
+          const deadline = new Date(t.deadline).getTime();
+          const now = Date.now();
+          const acceptDeadline = deadline - 2 * 3600 * 1000;
+          cd[t.id] = Math.max(0, Math.floor((acceptDeadline - now) / 1000));
         }
       });
       setAcceptCountdown(cd);
@@ -66,7 +69,10 @@ export default function VendorDashboardPage() {
               const cd: Record<string, number> = {};
               data.forEach(t => {
                 if (t.status === 'assigned' || t.status === 'reassigned') {
-                  cd[t.id] = 7200;
+                  const deadline = new Date(t.deadline).getTime();
+                  const now = Date.now();
+                  const acceptDeadline = deadline - 2 * 3600 * 1000;
+                  cd[t.id] = Math.max(0, Math.floor((acceptDeadline - now) / 1000));
                 }
               });
               setAcceptCountdown(cd);
