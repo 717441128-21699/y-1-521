@@ -111,6 +111,12 @@ export default function ConsultationPage() {
     setLoading(false);
   };
 
+  useEffect(() => {
+    if (step !== 2 && lockResult) {
+      clearLockResult();
+    }
+  }, [step]);
+
   const lockResources = async (planId: string) => {
     const data = await apiFetch<LockResult>('/api/consultation/lock', {
       method: 'POST', body: JSON.stringify({ planId }),
@@ -320,7 +326,7 @@ export default function ConsultationPage() {
               <h2 className="font-serif text-2xl font-bold text-warm-800 mb-2">锁定已过期</h2>
               <p className="text-warm-500 mb-6">您的锁定已超过24小时有效期，所选资源已自动释放，请重新选择方案</p>
               <div className="flex justify-center gap-3">
-                <button onClick={() => setStep(1)} className="btn-primary">返回方案列表</button>
+                <button onClick={() => { clearLockResult(); setStep(1); }} className="btn-primary">返回方案列表</button>
                 <button onClick={() => { clearLockResult(); setStep(0); }} className="btn-secondary">重新咨询</button>
               </div>
             </div>
@@ -374,8 +380,8 @@ export default function ConsultationPage() {
             </div>
 
             <div className="flex justify-center gap-3">
-              <button onClick={() => setStep(1)} className="btn-ghost">返回方案列表</button>
-              <button onClick={() => { setLockResult(null); setStep(0); }} className="btn-secondary !py-2 text-sm">重新咨询</button>
+              <button onClick={() => { clearLockResult(); setStep(1); }} className="btn-ghost">返回方案列表</button>
+              <button onClick={() => { clearLockResult(); setStep(0); }} className="btn-secondary !py-2 text-sm">重新咨询</button>
             </div>
           </div>
           )}

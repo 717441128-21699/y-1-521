@@ -41,7 +41,7 @@ export const DataStore = {
       const result = JSON.parse(JSON.stringify(dashboard)) as DashboardOverview;
       if (dateRange) {
         const start = new Date(dateRange.start);
-        const end = new Date(dateRange.end);
+        const end = new Date(dateRange.end + 'T23:59:59');
         const daysDiff = Math.ceil((end.getTime() - start.getTime()) / 86400000);
         const multiplier = Math.min(1.5, Math.max(0.3, daysDiff / 30));
 
@@ -50,15 +50,17 @@ export const DataStore = {
         result.kpis.avgSatisfaction = +(result.kpis.avgSatisfaction * (0.95 + Math.random() * 0.1)).toFixed(2);
         result.kpis.totalVendors = Math.round(result.kpis.totalVendors * Math.min(1, multiplier * 1.2));
 
-        result.projectProgress = result.projectProgress.map(p => {
+        result.projectProgress = result.projectProgress.filter(p => {
           const wedding = new Date(p.weddingDate);
-          const inRange = wedding >= start && wedding <= end;
-          return {
-            ...p,
-            status: inRange ? p.status : (Math.random() > 0.5 ? 'warning' : 'normal') as any,
-            progress: Math.max(0, Math.min(100, p.progress + (inRange ? 0 : Math.round((Math.random() - 0.6) * 20)))),
-          };
+          return wedding >= start && wedding <= end;
         });
+        if (result.projectProgress.length === 0) {
+          result.projectProgress = [dashboard.projectProgress[Math.floor(Math.random() * dashboard.projectProgress.length)]];
+        }
+        result.projectProgress = result.projectProgress.map(p => ({
+          ...p,
+          progress: Math.max(0, Math.min(100, p.progress + Math.round((Math.random() - 0.5) * 10))),
+        }));
 
         result.revenueBreakdown.monthly = result.revenueBreakdown.monthly.map((m, idx) => {
           const factor = (idx === 0 ? 1.2 : idx === 5 ? 0.7 : 0.9 + Math.random() * 0.3) * multiplier;
@@ -104,13 +106,22 @@ export const DataStore = {
       });
       const result = JSON.parse(JSON.stringify(dashboard)) as DashboardOverview;
       if (dateRange) {
-        const days = Math.max(1, (new Date(dateRange.end).getTime() - new Date(dateRange.start).getTime()) / 86400000);
+        const start = new Date(dateRange.start);
+        const end = new Date(dateRange.end + 'T23:59:59');
+        const days = Math.max(1, (end.getTime() - start.getTime()) / 86400000);
         const multiplier = days / 30;
         result.kpis.activeProjects = Math.max(1, Math.round(result.kpis.activeProjects * multiplier * (0.9 + Math.random() * 0.2)));
         result.kpis.monthlyRevenue = Math.round(result.kpis.monthlyRevenue * multiplier * (0.9 + Math.random() * 0.2));
         result.kpis.totalVendors = Math.max(1, Math.round(result.kpis.totalVendors * multiplier * (0.9 + Math.random() * 0.2)));
         result.kpis.avgSatisfaction = Math.max(3, Math.min(5, result.kpis.avgSatisfaction * (0.95 + Math.random() * 0.1)));
-        result.projectProgress = result.projectProgress.map(p => ({ ...p, progress: Math.min(100, Math.max(0, Math.round(p.progress * (0.85 + Math.random() * 0.3)))) }));
+        result.projectProgress = result.projectProgress.filter(p => {
+          const wedding = new Date(p.weddingDate);
+          return wedding >= start && wedding <= end;
+        });
+        if (result.projectProgress.length === 0) {
+          result.projectProgress = [dashboard.projectProgress[Math.floor(Math.random() * dashboard.projectProgress.length)]];
+        }
+        result.projectProgress = result.projectProgress.map(p => ({ ...p, progress: Math.min(100, Math.max(0, p.progress + Math.round((Math.random() - 0.5) * 6))) }));
         result.revenueBreakdown.monthly = result.revenueBreakdown.monthly.map(p => ({ ...p, revenue: Math.round(p.revenue * multiplier * (0.85 + Math.random() * 0.3)), cost: Math.round(p.cost * multiplier * (0.85 + Math.random() * 0.3)) }));
         result.revenueBreakdown.categories = result.revenueBreakdown.categories.map(p => ({ ...p, value: Math.round(p.value * multiplier * (0.85 + Math.random() * 0.3)) }));
         result.satisfactionTrend = result.satisfactionTrend.map(p => ({ ...p, score: Math.max(3, Math.min(5, p.score * (0.9 + Math.random() * 0.2))), projectCount: Math.max(1, Math.round(p.projectCount * multiplier * (0.85 + Math.random() * 0.3))) }));
@@ -328,7 +339,7 @@ export const DataStore = {
                 t.assignedVendorName = newVendor.name;
                 t.status = 'reassigned';
                 t.reassignedCount++;
-                t.deadline = new Date(now.getTime() + recommendRules.acceptTimeoutHours * 3600000).toISOString();
+                t.deadline = new Date(now.getTime() + recommendRules.acceptTimeoutHours * 3 * 3600000).toISOString();
                 reassigned.push({ ...t, coupleName: p.coupleName, weddingDate: p.weddingDate });
               }
             }
@@ -360,7 +371,7 @@ export const DataStore = {
             t.assignedVendorName = newVendor.name;
             t.status = 'reassigned';
             t.reassignedCount++;
-            t.deadline = new Date(now.getTime() + recommendRules.acceptTimeoutHours * 3600000).toISOString();
+            t.deadline = new Date(now.getTime() + recommendRules.acceptTimeoutHours * 3 * 3600000).toISOString();
             return { ...t, coupleName: p.coupleName, weddingDate: p.weddingDate };
           }
         }
