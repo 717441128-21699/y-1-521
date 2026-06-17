@@ -1,0 +1,120 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html, body, #root {
+  height: 100%;
+  font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background-color: #FAF8F5;
+  color: #4A4A4A;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F5F1EA;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #E8C4A0 0%, #C9A06C 100%);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #D9B080 0%, #B8894A 100%);
+}
+
+@layer components {
+  .btn-primary {
+    @apply px-6 py-2.5 rounded-full bg-brand-gradient text-white font-medium
+           shadow-rose-gold hover:bg-brand-gradient-hover hover:shadow-glow
+           transition-all duration-300 active:scale-[0.98] disabled:opacity-50
+           disabled:cursor-not-allowed inline-flex items-center justify-center gap-2;
+  }
+
+  .btn-secondary {
+    @apply px-6 py-2.5 rounded-full border border-brand-300 bg-white text-brand-600 font-medium
+           hover:bg-brand-50 hover:border-brand-400 transition-all duration-300
+           inline-flex items-center justify-center gap-2;
+  }
+
+  .btn-ghost {
+    @apply px-4 py-2 rounded-full text-warm-500 hover:bg-blush-100 hover:text-wine-500
+           transition-all duration-200 inline-flex items-center justify-center gap-1.5;
+  }
+
+  .card {
+    @apply bg-white rounded-2xl shadow-soft border border-blush-100
+           hover:shadow-card transition-all duration-300;
+  }
+
+  .card-glass {
+    @apply bg-white/80 backdrop-blur-md rounded-2xl shadow-soft border border-white/60;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-2.5 rounded-xl border border-warm-200 bg-ivory-50
+           text-warm-700 placeholder:text-warm-400 focus:outline-none
+           focus:border-brand-300 focus:ring-2 focus:ring-brand-100
+           transition-all duration-200;
+  }
+
+  .label-text {
+    @apply block text-sm font-medium text-warm-600 mb-1.5;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .section-title {
+    @apply font-serif text-xl font-semibold text-warm-700 mb-4 flex items-center gap-2;
+  }
+}
+
+.animate-number {
+  display: inline-block;
+  transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #B8894A 0%, #7B2D26 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.shimmer-bg {
+  background: linear-gradient(90deg, #F5F1EA 0%, #EEE7DA 50%, #F5F1EA 100%);
+  background-size: 1000px 100%;
+  animation: shimmer 2s linear infinite;
+}
+
+.dot-pulse {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.dot-pulse::after {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: pulse 1.5s ease-in-out infinite;
+}
